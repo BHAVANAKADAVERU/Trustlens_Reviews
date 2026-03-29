@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Activity - TrustLens</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+    <a href="/">Home</a>
+
+    {% if current_user.is_authenticated %}
+
+        <!-- COMMON -->
+        <!-- <a href="/">Review Check</a> -->
+        <a href="/product">Product</a>
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- USER -->
+        {% if current_user.role == "user" %}
+            <a href="/user_dashboard">My Activity</a>
+        {% endif %}
+
+        <!-- ADMIN -->
+        {% if current_user.role == "admin" %}
+            <a href="/batch">Batch Upload</a>
+            <a href="/comparison">Models</a>
+            <!-- <a href="/admin_dashboard">Admin Panel</a> -->
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+    <h2>📜 My Review History</h2>
+
+    <p>Welcome, {{ current_user.username }}</p>
+
+    {% if reviews %}
+
+        {% for r in reviews %}
+        <div class="review-card">
+
+            <p><b>Review:</b> {{ r.text }}</p>
+
+            <p>
+                <b>Result:</b> {{ r.label }}
+                ({{ r.confidence }}%)
+            </p>
+
+            <p style="font-size:12px; color:#777;">
+                {{ r.timestamp }}
+            </p>
+
+        </div>
+        {% endfor %}
+
+    {% else %}
+
+        <p>No reviews analyzed yet.</p>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

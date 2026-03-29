@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrustLens - Deceptive Review Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+    <a href="/">Home</a>
+
+    {% if current_user.is_authenticated %}
+
+        <!-- COMMON -->
+        <!-- <a href="/">Review Check</a> -->
+        <a href="/product">Product</a>
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- USER -->
+        {% if current_user.role == "user" %}
+            <a href="/user_dashboard">My Activity</a>
+        {% endif %}
+
+        <!-- ADMIN -->
+        {% if current_user.role == "admin" %}
+            <a href="/batch">Batch Upload</a>
+            <a href="/comparison">Models</a>
+            <!-- <a href="/admin_dashboard">Admin Panel</a> -->
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+<!-- ================= MAIN CONTENT ================= -->
+<div class="container">
+
+    {% if not current_user.is_authenticated %}
+
+        <!-- ===== WELCOME PAGE ===== -->
+        <div style="text-align:center; margin-top:120px;">
+            <h1 style="font-size:48px;">🔍 TrustLens</h1>
+
+            <p class="subtitle">
+                AI-Based Fake Review Detection System
+            </p>
+
+            <br><br>
+
+            <a href="/login">
+                <button style="padding:12px 25px; margin:10px;">Login</button>
+            </a>
+
+            <a href="/register">
+                <button style="padding:12px 25px; margin:10px;">Register</button>
+            </a>
+        </div>
+
+    {% else %}
+
+        <!-- ===== MAIN SYSTEM (AFTER LOGIN) ===== -->
+
+        <h1>🔍 TrustLens</h1>
+
+        <p class="subtitle">
+            ML-Based Detection of Deceptive Reviews <br>
+            Chicago Dataset | Explainable AI Enabled
+        </p>
+
+        <p>Welcome, {{ current_user.username }}</p>
+
+        <!-- ================= REVIEW INPUT ================= -->
+        <div class="card">
+            <h2>Single Review Analysis</h2>
+
+            <textarea id="review_text"
+                      placeholder="Enter hotel review here..."
+                      rows="8"></textarea>
+
+            <label>Select Model:</label>
+            <select id="model">
+                <option value="svm">Linear SVM</option>
+                <option value="lr">Logistic Regression</option>
+                <option value="rf">Random Forest</option>
+                <option value="xgb">XGBoost</option>
+            </select>
+
+            <button onclick="analyzeReview()">Analyze Review</button>
+        </div>
+
+        <!-- ================= RESULT BOX ================= -->
+        <div id="resultBox" class="result-box" style="display:none;">
+
+            <h2 id="predictionText"></h2>
+
+            <div class="confidence-section">
+                <span>Confidence:</span>
+                <span id="confidenceText"></span>%
+                <div class="progress">
+                    <div id="confidenceBar" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <!-- ================= WORD IMPORTANCE ================= -->
+            <div id="wordImportance" class="explanation-section"></div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<!-- ================= FOOTER ================= -->
+<div class="footer">
+    TrustLens 2026 | IEEE Ready Deceptive Review Detection System
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

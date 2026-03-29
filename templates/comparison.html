@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Model Comparison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+    <a href="/">Home</a>
+
+    {% if current_user.is_authenticated %}
+
+        <!-- COMMON -->
+        <!-- <a href="/">Review Check</a> -->
+        <a href="/product">Product</a>
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- ADMIN ONLY -->
+        {% if current_user.role == "admin" %}
+            <a href="/batch">Batch Upload</a>
+            <a href="/comparison">Models</a>
+            <!-- <a href="/admin_dashboard">Admin Panel</a> -->
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+    <h1>⚖️ Model Performance Comparison</h1>
+
+    <p>Comparison of machine learning models used in TrustLens</p>
+
+    <canvas id="comparisonChart"></canvas>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+const ctx = document.getElementById("comparisonChart");
+
+new Chart(ctx, {
+    type: "bar",
+    data: {
+        labels: ["Logistic Regression", "Linear SVM", "Random Forest", "XGBoost"],
+        datasets: [{
+            label: "Accuracy",
+            data: [0.8843, 0.8812, 0.85, 0.80],
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>
