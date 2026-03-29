@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Batch Analysis - TrustLens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+    <a href="/">Home</a>
+
+    {% if current_user.is_authenticated %}
+
+        <!-- COMMON -->
+        <!-- <a href="/">Review Check</a> -->
+        <a href="/product">Product</a>
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- ADMIN ONLY -->
+        {% if current_user.role == "admin" %}
+            <a href="/batch">Batch Upload</a>
+            <a href="/comparison">Models</a>
+            
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+    <h1>📂 Batch Review Analysis</h1>
+
+    <p>Upload a CSV file containing a column named <b>review</b></p>
+
+    <input type="file" id="csvFile">
+    <button onclick="uploadCSV()">Upload & Analyze</button>
+
+    <br><br>
+
+    <!-- DOWNLOAD BUTTON -->
+    <button onclick="downloadCSV()">⬇ Download Results</button>
+
+    <h3>Results</h3>
+
+    <table id="batchTable">
+        <thead>
+            <tr>
+                <th>Review</th>
+                <th>Prediction</th>
+                <th>Confidence</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+let batchResults = [];
+
+// Upload CSV
+async function uploadCSV(){
+
+    let fileInput = document.getElementById("csvFile");
+    let file = fileInput.files[0];
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    let res = await fetch("/batch_predict", {
+        method: "POST",
+        body: formData
+    });
+
+    let data = await res.json();
+
+    batchResults = data.results; // store for download
+
+    let table = document.querySelector("#batchTable tbody");
+    table.innerHTML = "";
+
+    data.results.forEach(r => {
+        table.innerHTML += `
+            <tr>
+                <td>${r.review}</td>
+                <td>${r.prediction}</td>
+                <td>${r.confidence}%</td>
+            </tr>
+        `;
+    });
+}
+
+// Download CSV
+function downloadCSV(){
+
+    let csv = "Review,Prediction,Confidence\n";
+
+    batchResults.forEach(r => {
+        csv += `"${r.review}","${r.prediction}",${r.confidence}\n`;
+    });
+
+    let blob = new Blob([csv], { type: "text/csv" });
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "batch_results.csv";
+    a.click();
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TrustLens Product</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+body{
+font-family:Arial;
+background:#e6e0ff;
+margin:0;
+padding:40px;
+}
+.container{
+width:900px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:8px;
+}
+.product-section{
+display:flex;
+gap:40px;
+}
+.product-img{
+width:220px;
+}
+.button{
+background:#2a5298;
+border:none;
+padding:10px 20px;
+border-radius:6px;
+cursor:pointer;
+margin-top:10px;
+}
+.review-card{
+border:1px solid #ddd;
+padding:12px;
+margin-top:15px;
+border-radius:6px;
+background:#fafafa;
+}
+.verified{
+background:#d4edda;
+padding:6px;
+border-radius:4px;
+color:#155724;
+font-weight:bold;
+}
+.fake{
+background:#fff3cd;
+padding:6px;
+border-radius:4px;
+color:#856404;
+font-weight:bold;
+}
+.conf{
+font-size:12px;
+color:#555;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+<a href="/">Home</a>
+
+{% if current_user.is_authenticated %}
+
+    <!-- <a href="/">Review Check</a> -->
+    <a href="/product">Product</a>
+    <a href="/dashboard">Dashboard</a>
+
+    {% if current_user.role == "user" %}
+        <a href="/user_dashboard">My Activity</a>
+    {% endif %}
+
+    {% if current_user.role == "admin" %}
+        <a href="/batch">Batch Upload</a>
+        <a href="/comparison">Models</a>
+        <!-- <a href="/admin_dashboard">Admin Panel</a> -->
+    {% endif %}
+
+    <a href="/logout">Logout</a>
+
+{% else %}
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+{% endif %}
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+<h2>Hotel Booking Page</h2>
+
+<div class="product-section">
+
+<div>
+<img class="product-img"
+src="https://th.bing.com/th/id/OIP.nFUWZxm5F5FXIc4GQCLdRwHaFY?w=237&h=180">
+
+<h3>Luxury Hotel Taj Falaknuma</h3>
+
+<p>⭐⭐⭐⭐☆ (4.5 out of 5 stars)</p>
+
+<button class="button">Room Reservation</button>
+</div>
+
+<div>
+<h4>Hotel Description</h4>
+
+<p>
+A luxurious heritage palace hotel offering royal hospitality, stunning architecture, and breathtaking views of Hyderabad.
+</p>
+
+<ul>
+<li>Hilltop palace location</li>
+<li>Heritage royal architecture</li>
+<li>Luxury rooms</li>
+<li>Fine dining</li>
+</ul>
+
+</div>
+
+</div>
+
+<hr>
+
+<h3>Customer Reviews</h3>
+
+<textarea id="review_text"
+placeholder="Write a product review to check authenticity..."></textarea>
+
+<br>
+<button class="button" onclick="submitReview()">Submit Review</button>
+
+<div id="reviews">
+
+{% for r in reviews %}
+
+<div class="review-card">
+
+<p><b>{{ r.user.username if r.user else "User" }}</b></p>
+
+<p>{{ r.review_text }}</p>
+
+{% if "Truthful" in r.label %}
+<div class="verified">✔ Authentic Review</div>
+{% else %}
+<div class="fake">⚠ Potential Spam Detected</div>
+{% endif %}
+
+<p class="conf">
+Confidence Score: {{ r.confidence }}%
+</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+async function submitReview(){
+
+let text = document.getElementById("review_text").value;
+
+let res = await fetch("/submit_review",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({review_text:text})
+});
+
+let data = await res.json();
+
+let reviewDiv = document.getElementById("reviews");
+
+let status = data.prediction.includes("Truthful")
+? '<div class="verified">✔ Authentic Review</div>'
+: '<div class="fake">⚠ Potential Spam Detected</div>';
+
+reviewDiv.innerHTML =
+`
+<div class="review-card">
+
+<p><b>You</b></p>
+
+<p>${data.review}</p>
+
+${status}
+
+<p class="conf">Confidence Score: ${data.confidence}%</p>
+
+</div>
+` + reviewDiv.innerHTML;
+
+document.getElementById("review_text").value="";
+
+}
+
+</script>
+
+</body>
+</html>

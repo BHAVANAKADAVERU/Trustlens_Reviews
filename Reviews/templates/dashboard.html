@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+    <a href="/">Home</a>
+
+    {% if current_user.is_authenticated %}
+
+        <!-- COMMON -->
+        <!-- <a href="/">Review Check</a> -->
+        <a href="/product">Product</a>
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- USER -->
+        {% if current_user.role == "user" %}
+            <a href="/user_dashboard">My Activity</a>
+        {% endif %}
+
+        <!-- ADMIN -->
+        {% if current_user.role == "admin" %}
+            <a href="/batch">Batch Upload</a>
+            <a href="/comparison">Models</a>
+            <!-- <a href="/admin_dashboard">Admin Panel</a> -->
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+    <h1>📊 Dashboard</h1>
+
+    <p>Welcome, {{ current_user.username }}</p>
+
+    <!-- USER DASHBOARD -->
+    {% if current_user.role == "user" %}
+
+        <h3>Your Activity Overview</h3>
+        <canvas id="userChart"></canvas>
+
+    {% endif %}
+
+    <!-- ADMIN DASHBOARD -->
+    {% if current_user.role == "admin" %}
+
+        <h3>System Analytics</h3>
+        <canvas id="adminChart"></canvas>
+
+    {% endif %}
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+fetch("/analytics")
+.then(res => res.json())
+.then(data => {
+
+    // USER CHART
+    if (document.getElementById("userChart")) {
+
+        new Chart(document.getElementById("userChart"), {
+            type: "bar",
+            data: {
+                labels: ["Total", "Fake", "Genuine"],
+                datasets: [{
+                    label: "Your Predictions",
+                    data: [
+                        data.total_predictions,
+                        data.spam_count,
+                        data.genuine_count
+                    ]
+                }]
+            }
+        });
+    }
+
+    // ADMIN CHART
+    if (document.getElementById("adminChart")) {
+
+        new Chart(document.getElementById("adminChart"), {
+            type: "bar",
+            data: {
+                labels: ["Total", "Fake", "Genuine"],
+                datasets: [{
+                    label: "System Usage",
+                    data: [
+                        data.total_predictions,
+                        data.spam_count,
+                        data.genuine_count
+                    ]
+                }]
+            }
+        });
+    }
+
+});
+
+</script>
+
+</body>
+</html>

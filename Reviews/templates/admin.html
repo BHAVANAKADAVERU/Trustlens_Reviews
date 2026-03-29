@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar">
+
+    <a href="/">Home</a>
+
+    {% if current_user.is_authenticated %}
+
+        <!-- COMMON -->
+        <!-- <a href="/">Review Check</a> -->
+        <a href="/product">Product</a>
+        <a href="/dashboard">Dashboard</a>
+
+        <!-- ADMIN ONLY -->
+        {% if current_user.role == "admin" %}
+            <a href="/batch">Batch Upload</a>
+            <a href="/comparison">Models</a>
+            <!-- <a href="/admin_dashboard">Admin Panel</a> -->
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container">
+
+    <h1>🔐 Admin Analytics</h1>
+
+    <p>Welcome, {{ current_user.username }}</p>
+
+    <!-- SYSTEM STATS -->
+    <div id="stats"></div>
+
+    <hr>
+
+    <!-- USER ACTIVITY -->
+    <h3>👥 User Activity</h3>
+    <div id="users"></div>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+// 🔹 SYSTEM ANALYTICS
+fetch("/analytics")
+.then(res => res.json())
+.then(data => {
+
+    document.getElementById("stats").innerHTML = `
+        <p><b>Total Predictions:</b> ${data.total_predictions}</p>
+        <p><b>Fake Reviews:</b> ${data.spam_count}</p>
+        <p><b>Genuine Reviews:</b> ${data.genuine_count}</p>
+         
+    `;
+});
+
+// 🔹 USER ACTIVITY
+fetch("/admin_dashboard")
+.then(res => res.json())
+.then(data => {
+
+    let html = "";
+
+    data.forEach(u => {
+        html += `
+            <div style="padding:10px; border-bottom:1px solid #ddd;">
+                <b>${u.username}</b> <br>
+                Reviews Tested: ${u.reviews_count}
+            </div>
+        `;
+    });
+
+    document.getElementById("users").innerHTML = html;
+});
+
+</script>
+
+</body>
+</html>
